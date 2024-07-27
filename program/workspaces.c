@@ -12,7 +12,7 @@ struct workspaces
 	unsigned int need_sudoer;
 } *workspaces;
 
-int	find_workspace(char *project)
+int find_workspace(char *project)
 {
 	int i = 0;
 
@@ -28,13 +28,15 @@ int	find_workspace(char *project)
 	return -1;
 }
 
-void	start_project(char *project)
+void start_project(char *project)
 {
+
 	int workspace_id = find_workspace(project);
 
 	if (workspace_id != -1)
 	{
 		int i = 0;
+		printf("Starting project %s\n", project);
 		while (workspaces[i].id == workspace_id)
 		{
 			if (workspaces[i].need_sudoer)
@@ -52,13 +54,15 @@ void	start_project(char *project)
 	}
 }
 
-void	stop_project(char *project)
+void stop_project(char *project)
 {
+
 	int workspace_id = find_workspace(project);
 
 	if (workspace_id != -1)
 	{
 		int i = 0;
+		printf("Stopping project %s\n", project);
 		while (workspaces[i].id == workspace_id)
 		{
 			if (workspaces[i].stop_command)

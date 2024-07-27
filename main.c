@@ -13,11 +13,11 @@ int	check_argv(char *argv, char *str)
 
 int	main(int argc, char **argv)
 {
-	if (argc > 2)
+	if (argc > 3)
 	{
 		usage();
 	}
-	if (argc == 1)
+	if (argc == 2)
 	{
 		if (check_argv(argv[1], "settings"))
 		{
@@ -28,7 +28,7 @@ int	main(int argc, char **argv)
 			usage();
 		}
 	}
-	else if (argc == 2)
+	else if (argc == 3)
 	{
 		if (check_argv(argv[1], "add"))
 		{

@@ -2,7 +2,6 @@
 #include "program/program.h"
 #include "settings/settings.h"
 
-
 int	check_argv(char *argv, char *str)
 {
 	if (strcmp(argv, str) == 0)

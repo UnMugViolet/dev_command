@@ -1,5 +1,6 @@
 COMPILE = cc
 CFLAGS = -Wextra -Wall -Werror
+DEBUG = -g3
 NAME = workspace
 SRC = main.c program/workspaces.c settings/settings.c settings/web_browsers.c settings/code_editors.c
 DEPS = $(SRC:.c=.o)
@@ -12,3 +13,6 @@ $(NAME): $(DEPS)
 
 clean:
 	rm -f $(DEPS) $(NAME)
+
+debug: $(DEPS)
+	$(COMPILE) $(CFLAGS) $(DEBUG) -o $(NAME) $(DEPS)

@@ -16,3 +16,8 @@ clean:
 
 debug: $(DEPS)
 	$(COMPILE) $(CFLAGS) $(DEBUG) -o $(NAME) $(DEPS)
+
+re: clean $(NAME)
+
+valgrind: debug
+	valgrind --leak-check=full ./$(NAME) 2> valgrind.log

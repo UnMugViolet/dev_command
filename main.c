@@ -15,13 +15,19 @@ int	main(int argc, char **argv)
 {
 	if (argc > 3)
 	{
-		usage();
+		help();
 	}
 	if (argc == 2)
 	{
 		if (check_argv(argv[1], "settings"))
 		{
 			settings_menu();
+		} else if (check_argv(argv[1], "help"))
+		{
+			help();
+		} else if (check_argv(argv[1], "list"))
+		{
+			list_workspaces();
 		}
 		else
 		{
@@ -42,11 +48,11 @@ int	main(int argc, char **argv)
 		{
 			if (check_argv(argv[2], "up"))
 			{
-				start_project(argv[1]);
+				start_workspace(argv[1]);
 			}
 			else if (check_argv(argv[2], "down"))
 			{
-				stop_project(argv[1]);
+				stop_workspace(argv[1]);
 			}
 			else
 			{

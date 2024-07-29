@@ -17,7 +17,7 @@ void	help(void)
 	printf("Launch project: workspace [project_name] [up | down].\n");
 	printf("Settings: workspace settings -> Allow to change the default browser and code editor.\n");
 	printf("List: workspace list -> List all available projects\n");
-	printf("Any issue? Contact me at paul@rocketegg.systems.\nMade by Paul Jaguin.\n");
+	printf("Any issue? Contact me at paul@rocketegg.systems\nMade by Paul Jaguin.\n");
 }
 
 void	usage(void)

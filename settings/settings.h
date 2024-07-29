@@ -4,6 +4,18 @@
 void  settings_menu();
 void	add_workspace();
 void	remove_workspace();
+
+struct web_browser
+{
+	unsigned int id;
+	char name[50];
+	char command[65];
+};
+
+void  initialize_browsers();
+void  list_browsers();
+struct web_browser *choose_browser();
+
 void	help(void);
 void	usage(void);
 

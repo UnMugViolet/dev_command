@@ -13,7 +13,21 @@ struct workspaces
 } *workspaces = NULL;
 
 void list_workspaces()
-{}
+{
+	int i = 0;
+
+	if (workspaces == NULL)
+	{
+		perror("There is no workspace available.\nworkspace add [project_name] to add a project.\n");
+		return;
+	}
+
+	while (workspaces[i].id)
+	{
+		printf("Project %s\n", workspaces[i].name);
+		i++;
+	}
+}
 
 int find_workspace(char *project)
 {
@@ -21,7 +35,7 @@ int find_workspace(char *project)
 
 	if (workspaces == NULL)
 	{
-		printf("There is no workspace available.\nworkspace add [project_name] to add a project.\n");
+		perror("There is no workspace available.\nworkspace add [project_name] to add a project.\n");
 		return -1;
 	}
 
@@ -33,7 +47,7 @@ int find_workspace(char *project)
 		}
 		i++;
 	}
-	printf("Project not found\n");
+	perror("Project not found\n");
 	return -1;
 }
 

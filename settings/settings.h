@@ -7,6 +7,17 @@ struct web_browser
 	char command[65];
 };
 
+struct code_editor
+{
+  unsigned int id;
+  char name[50];
+  char command[65];
+};
+
+// code_editors.c
+void  initialize_code_editor();
+void  list_code_editors();
+
 // web_browsers.c
 void  initialize_browsers();
 void  list_browsers();

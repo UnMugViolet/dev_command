@@ -123,7 +123,7 @@ struct web_browser *choose_browser()
 			return selected_browser;
 		}
 	}
-	perror("Failed to find browser");
+	printf("Failed to find browser");
 	free(selected_browser);
 	return NULL;
 }

@@ -47,7 +47,7 @@ void save_selected_browser(struct web_browser *browser)
 		perror("Failed to open file for writing");
 		exit(EXIT_FAILURE);
 	}
-	if(fwrite(browser, sizeof(struct web_browser), 1, file))
+	if(fwrite(browser, sizeof(struct web_browser), 1, file) != 1)
 	{
 		perror("Failed to write web browser data to file");
 		fclose(file);
@@ -70,7 +70,7 @@ struct web_browser *load_selected_browser()
 		fclose(file);
 		return NULL;
 	}
-	if (fread(browser, sizeof(struct web_browser), 1, file))
+	if (fread(browser, sizeof(struct web_browser), 1, file) != 1)
 	{
 		perror("Failed to read browser data from file");
 		free(browser);

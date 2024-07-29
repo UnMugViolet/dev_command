@@ -3,20 +3,38 @@
 <p>Short program that do a quick launch of your project. <br>
 You can output your favorite code editor, web browser and add multiple projects.</p>
 
-## 1. How it works ? 
-______________
+## 1. Install 
 
-### Command to add a new project : 
+### Initialize the program with the command: 
 ```bash
-dev add [project_name]
+workspace init
+```
+
+<p>Answer the question, and there you go ready to use !</p>
+
+## 2. How it works ? 
+
+### Add a new project : 
+```bash
+workspace add [project_name]
 ```
 
 ### Open the settings of your workspace_creator : 
 ```bash
-dev settings
+workspace settings
+```
+
+### List all the projects you have : 
+```bash
+workspace list
 ```
 
 ### Command to remove a project from the list : 
 ```bash
-dev remove [project_name]
+workspace remove [project_name]
+```
+
+## 3. Need Help ? 
+```bash
+workspace help
 ```

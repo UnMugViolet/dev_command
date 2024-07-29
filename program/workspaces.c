@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "../settings/settings.h"
 struct workspaces
 {
 	int id;
@@ -18,7 +19,7 @@ void list_workspaces()
 
 	if (workspaces == NULL)
 	{
-		perror("There is no workspace available.\nworkspace add [project_name] to add a project.\n");
+		printf("There is no workspace available.\nworkspace add [project_name] to add a project.\n");
 		return;
 	}
 
@@ -35,7 +36,7 @@ int find_workspace(char *project)
 
 	if (workspaces == NULL)
 	{
-		perror("There is no workspace available.\nworkspace add [project_name] to add a project.\n");
+		printf("There is no workspace available.\nworkspace add [project_name] to add a project.\n");
 		return -1;
 	}
 
@@ -47,12 +48,18 @@ int find_workspace(char *project)
 		}
 		i++;
 	}
-	perror("Project not found\n");
+	printf("Project not found\n");
 	return -1;
 }
 
 void start_workspace(char *project)
 {
+	struct web_browser *selected_browser = load_selected_browser();
+	if (selected_browser == NULL)
+	{
+		fprintf(stderr, "No browser selected. Please run the init process.\n");
+		exit(EXIT_FAILURE);
+	}
 
 	int workspace_id = find_workspace(project);
 
@@ -72,6 +79,17 @@ void start_workspace(char *project)
 		if (workspaces[i].launch_command)
 		{
 			system(workspaces[i].launch_command);
+		}
+		if (workspaces[i].urls)
+		{
+			int j = 0;
+			while (workspaces[i].urls[j])
+			{
+				char command[256];
+				sprintf(command, "%s %s", selected_browser->command, workspaces[i].urls[j]);
+				system(command);
+				j++;
+			}
 		}
 		i++;
 	}

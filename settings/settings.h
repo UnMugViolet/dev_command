@@ -15,6 +15,8 @@ struct web_browser
 void  initialize_browsers();
 void  list_browsers();
 struct web_browser *choose_browser();
+struct web_browser *load_selected_browser();
+void save_selected_browser(struct web_browser *selected_browser);
 
 void	help(void);
 void	usage(void);

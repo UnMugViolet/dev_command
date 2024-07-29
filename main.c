@@ -6,59 +6,20 @@
 
 struct web_browser *selected_browser = NULL;
 
-void save_selected_browser(struct web_browser *browser)
-{
-	FILE *file = fopen("selected_browser.dat", "wb");
-	if (file == NULL)
-	{
-		perror("Failed to open file for writing");
-		exit(EXIT_FAILURE);
-	}
-	fwrite(browser, sizeof(struct web_browser), 1, file);
-	fclose(file);
-}
-
-struct web_browser *load_selected_browser()
-{
-	FILE *file = fopen("selected_browser.dat", "rb");
-	if (file == NULL)
-	{
-		return NULL;
-	}
-	struct web_browser *browser = malloc(sizeof(struct web_browser));
-	if (browser == NULL)
-	{
-		perror("Failed to allocate memory for browser");
-		fclose(file);
-		return NULL;
-	}
-	fread(browser, sizeof(struct web_browser), 1, file);
-	fclose(file);
-	return browser;
-}
-
 void init()
 {
-	selected_browser = load_selected_browser();
-	if (selected_browser == NULL)
+	initialize_browsers();
+	list_browsers();
+	selected_browser = choose_browser();
+	if (selected_browser != NULL)
 	{
-		initialize_browsers();
-		list_browsers();
-		selected_browser = choose_browser();
-		if (selected_browser != NULL)
-		{
-			save_selected_browser(selected_browser);
-			printf("You have selected: %s\n", selected_browser->name);
-		}
-		else
-		{
-			fprintf(stderr, "No browser selected. Exiting...\n");
-			exit(EXIT_FAILURE);
-		}
+		save_selected_browser(selected_browser);
+		printf("You have selected: %s\nInitialization finished...\n", selected_browser->name);
 	}
 	else
 	{
-		printf("Previously selected browser: %s\n", selected_browser->name);
+		fprintf(stderr, "No browser selected. Exiting...\n");
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -73,17 +34,16 @@ int check_argv(char *argv, char *str)
 
 int main(int argc, char **argv)
 {
+	selected_browser = load_selected_browser();
 	if (selected_browser == NULL)
 	{
 		init();
-		return (0);
 	}
-
 	if (argc > 3)
 	{
 		help();
 	}
-	if (argc == 2)
+	else if (argc == 2)
 	{
 		if (check_argv(argv[1], "settings"))
 		{
@@ -96,6 +56,10 @@ int main(int argc, char **argv)
 		else if (check_argv(argv[1], "list"))
 		{
 			list_workspaces();
+		}
+		else if (check_argv(argv[1], "init"))
+		{
+			init();
 		}
 		else
 		{
@@ -127,6 +91,10 @@ int main(int argc, char **argv)
 				usage();
 			}
 		}
+	}
+	else
+	{
+		usage();
 	}
 	return (0);
 }

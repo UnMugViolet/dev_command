@@ -1,4 +1,6 @@
 *.o
+*.dat
 */*.o
+*/*.dat
 .vscode
 workspace

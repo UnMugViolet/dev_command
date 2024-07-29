@@ -39,8 +39,55 @@ void initialize_browsers()
 	strcpy(web_browsers[4].command, "microsoft-edge");
 }
 
+void save_selected_browser(struct web_browser *browser)
+{
+	FILE *file = fopen("selected_browser.dat", "wb");
+	if (file == NULL)
+	{
+		perror("Failed to open file for writing");
+		exit(EXIT_FAILURE);
+	}
+	if(fwrite(browser, sizeof(struct web_browser), 1, file))
+	{
+		perror("Failed to write web browser data to file");
+		fclose(file);
+		exit(EXIT_FAILURE);
+	}
+	fclose(file);
+}
+
+struct web_browser *load_selected_browser()
+{
+	FILE *file = fopen("selected_browser.dat", "rb");
+	if (file == NULL)
+	{
+		return NULL;
+	}
+	struct web_browser *browser = malloc(sizeof(struct web_browser));
+	if (browser == NULL)
+	{
+		perror("Failed to allocate memory for browser");
+		fclose(file);
+		return NULL;
+	}
+	if (fread(browser, sizeof(struct web_browser), 1, file))
+	{
+		perror("Failed to read browser data from file");
+		free(browser);
+		fclose(file);
+		return NULL;
+	}
+	fclose(file);
+	return browser;
+}
+
 void list_browsers()
 {
+	struct web_browser *selected_browser = load_selected_browser();
+	if (selected_browser != NULL)
+	{
+		printf("Current browser: %s\n\n", selected_browser->name);
+	}
 	printf("Available web browsers:\n");
 	for (int i = 0; i < 5; i++)
 	{

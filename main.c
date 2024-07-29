@@ -38,11 +38,11 @@ int	main(int argc, char **argv)
 	{
 		if (check_argv(argv[1], "add"))
 		{
-			add_project(argv[2]);
+			add_workspace(argv[2]);
 		}
 		else if (check_argv(argv[1], "remove"))
 		{
-			remove_project(argv[2]);
+			remove_workspace(argv[2]);
 		}
 		else
 		{

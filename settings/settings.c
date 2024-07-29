@@ -3,10 +3,10 @@
 void  settings_menu()
 {}
 
-void	add_project()
+void	add_workspace()
 {}
 
-void	remove_project()
+void	remove_workspace()
 {}
 
 void	help(void)

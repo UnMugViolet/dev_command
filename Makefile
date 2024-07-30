@@ -2,7 +2,7 @@ COMPILE = cc
 CFLAGS = -Wextra -Wall -Werror
 DEBUG = -g3
 NAME = workspace
-SRC = main.c program/workspaces.c settings/settings.c settings/web_browsers.c settings/code_editors.c
+SRC = main.c program/workspaces.c settings/settings.c settings/web_browsers.c settings/code_editors.c utils/str_split.c
 DEPS = $(SRC:.c=.o)
 
 $(NAME): $(DEPS)

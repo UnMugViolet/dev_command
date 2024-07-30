@@ -68,14 +68,14 @@ void add_workspace(char *workspace_name)
 	printf("Enter URLs (comma-separated): ");
 	printf("Put comma [,] if no url\n");
 	scanf("%s", urls_input);
-	workspace.urls = urls_input;
+	workspace.urls = str_split(urls_input, ",");
 	clear_input_buffer();
 
 	// system("clear");
 	char start_command_input[120];
 	printf("Enter start commands (comma-separated): ");
 	scanf("%s", start_command_input);
-	workspace.start_command = start_command_input;
+	workspace.start_command = str_split(start_command_input, ",");
 	clear_input_buffer();
 
 	// system("clear");
@@ -83,7 +83,7 @@ void add_workspace(char *workspace_name)
 	printf("Enter stop commands (comma-separated): ");
 	printf("Put comma [,] if no stop command\n");
 	scanf("%s", stop_command_input);
-	workspace.stop_command = stop_command_input;
+	workspace.stop_command = str_split(stop_command_input, ",");
 	clear_input_buffer();
 
 	// system("clear");

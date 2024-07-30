@@ -1,54 +1,89 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <errno.h>
 #include "../settings/settings.h"
-struct workspaces
+#include "../workspaces.h"
+
+int count_workspaces()
 {
-	int id;
-	char name [50];
-	char path [120];
-	char **urls;
-	char *launch_command;
-	char *stop_command;
-	unsigned int need_sudoer;
-} *workspaces = NULL;
+	FILE *file = fopen("workspaces.dat", "rb");
+	if (file == NULL)
+	{
+		// If the file does not exist, return 0 workspaces
+		if (errno == ENOENT)
+		{
+			return 0;
+		}
+		else
+		{
+			perror("Failed to open file for reading");
+			exit(EXIT_FAILURE);
+		}
+	}
+	fseek(file, 0, SEEK_END);
+	long file_size = ftell(file);
+	fclose(file);
+	return file_size / sizeof(struct workspaces);
+}
 
 void list_workspaces()
 {
-	int i = 0;
-
-	if (workspaces == NULL)
+	FILE *file = fopen("workspaces.dat", "rb");
+	if (file == NULL)
 	{
-		printf("There is no workspace available.\nworkspace add [project_name] to add a project.\n");
-		return;
+		perror("Failed to open file for reading");
+		exit(EXIT_FAILURE);
 	}
-
-	while (workspaces[i].id)
+	struct workspaces workspace;
+	while (fread(&workspace, sizeof(struct workspaces), 1, file))
 	{
-		printf("Project %s\n", workspaces[i].name);
-		i++;
+		printf("Workspace id: %i\n", workspace.id);
+		printf("Workspace name: %s\n", workspace.name);
+		printf("\tWorkspace path: %s\n", workspace.path);
+		printf("\tURLs: ");
+		for (int i = 0; workspace.urls[i]; i++)
+		{
+			printf("\t\t%s ", workspace.urls[i]);
+		}
+		printf("\n");
+		printf("\tStart commands: ");
+		for (int i = 0; workspace.start_command[i]; i++)
+		{
+			printf("\t\t%s ", workspace.start_command[i]);
+		}
+		printf("\n");
+		printf("Stop commands: ");
+		for (int i = 0; workspace.stop_command[i]; i++)
+		{
+			printf("%s ", workspace.stop_command[i]);
+		}
+		printf("\n");
+		printf("Need sudoer: %d\n", workspace.need_sudoer);
 	}
+	fclose(file);
 }
 
 int find_workspace(char *project)
 {
-	int i = 0;
-
-	if (workspaces == NULL)
+	FILE *file = fopen("workspaces.dat", "rb");
+	if (file == NULL)
 	{
-		printf("There is no workspace available.\nworkspace add [project_name] to add a project.\n");
-		return -1;
+		perror("Failed to open file for reading");
+		exit(EXIT_FAILURE);
 	}
-
-	while (workspaces[i].id)
+	struct workspaces workspace;
+	while (fread(&workspace, sizeof(struct workspaces), 1, file))
 	{
-		if (strcmp(workspaces[i].name, project) == 0)
+		if (strcmp(workspace.name, project) == 0)
 		{
-			return workspaces[i].id;
+			fclose(file);
+			return workspace.id;
 		}
-		i++;
 	}
-	printf("Project not found\n");
+	fclose(file);
+	fprintf(stderr, "Workspace %s not found\n", project);
 	return -1;
 }
 
@@ -57,41 +92,67 @@ void start_workspace(char *project)
 	struct web_browser *selected_browser = load_selected_browser();
 	if (selected_browser == NULL)
 	{
-		fprintf(stderr, "No browser selected. Please run the init process.\n");
+		fprintf(stderr, "No browser selected. Please run the init process first.\n");
 		exit(EXIT_FAILURE);
 	}
 
 	int workspace_id = find_workspace(project);
 
 	if (workspace_id == -1)
-		exit(EXIT_FAILURE);
-	
-	int i = 0;
-	printf("Starting project %s\n", project);
-	while (workspaces[i].id == workspace_id)
 	{
-		if (workspaces[i].need_sudoer)
+		fprintf(stderr, "Workspace %s not found\n", project);
+		exit(EXIT_FAILURE);
+	}
+
+	// Change the current directory to the workspace path
+	if (chdir(workspaces[workspace_id].path) == -1)
+	{
+		perror("Failed to change directory to workspace path");
+		exit(EXIT_FAILURE);
+	}
+
+	// Open the code editor
+	if (workspaces[workspace_id].editor)
+	{
+		if (workspaces[workspace_id].editor->command)
 		{
-			printf("Please enter your password in order to start the project\n");
+			system(workspaces[workspace_id].editor->command);
+		}
+		perror("Failed to open code editor");
+		exit(EXIT_FAILURE);
+	}
+
+	// Check if the project needs sudoer before starting
+	if (workspaces[workspace_id].need_sudoer)
+	{
+		if (workspaces[workspace_id].need_sudoer)
+		{
 			system("sudo -v");
-			system(workspaces[i].launch_command);
 		}
-		if (workspaces[i].launch_command)
+	}
+
+	// Start the project
+	if (workspaces[workspace_id].start_command)
+	{
+		for (int i = 0; workspaces[workspace_id].start_command[i]; i++)
 		{
-			system(workspaces[i].launch_command);
+			system(workspaces[workspace_id].start_command[i]);
+			system("&");
 		}
-		if (workspaces[i].urls)
+	}
+
+	// Wait for the project to start
+	sleep(4);
+
+	// Open the browser
+	if (workspaces[workspace_id].urls)
+	{
+		for (int i = 0; workspaces[workspace_id].urls[i]; i++)
 		{
-			int j = 0;
-			while (workspaces[i].urls[j])
-			{
-				char command[256];
-				sprintf(command, "%s %s", selected_browser->command, workspaces[i].urls[j]);
-				system(command);
-				j++;
-			}
+			char command[120];
+			sprintf(command, "%s %s", selected_browser->command, workspaces[workspace_id].urls[i]);
+			system(command);
 		}
-		i++;
 	}
 }
 
@@ -101,16 +162,19 @@ void stop_workspace(char *project)
 	int workspace_id = find_workspace(project);
 
 	if (workspace_id == -1)
-		exit(EXIT_FAILURE);
-	
-	int i = 0;
-	printf("Stopping project %s\n", project);
-	while (workspaces[i].id == workspace_id)
 	{
-		if (workspaces[i].stop_command)
-		{
-			system(workspaces[i].stop_command);
-		}
-		i++;
+		fprintf(stderr, "Workspace %s not found\n", project);
+		exit(EXIT_FAILURE);
 	}
+
+	printf("Stopping project %s\n", project);
+	// Stop the project
+	if (workspaces[workspace_id].stop_command)
+	{
+		for (int i = 0; workspaces[workspace_id].stop_command[i]; i++)
+		{
+			system(workspaces[workspace_id].stop_command[i]);
+		}
+	}
+	fprintf(stderr, "Failed to stop project %s\n", project);
 }

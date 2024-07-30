@@ -9,9 +9,11 @@ struct web_browser
 	char command[65];
 } *web_browsers;
 
+const unsigned int web_browsers_count = 5;
+
 void initialize_browsers()
 {
-	web_browsers = malloc(sizeof(struct web_browser) * 5);
+	web_browsers = malloc(sizeof(struct web_browser) * web_browsers_count);
 	if (web_browsers == NULL)
 	{
 		perror("Failed to allocate memory for web_browsers");
@@ -28,7 +30,7 @@ void initialize_browsers()
 
 	web_browsers[2].id = 3;
 	strcpy(web_browsers[2].name, "Brave");
-	strcpy(web_browsers[2].command, "brave-browser");
+	strcpy(web_browsers[2].command, "brave");
 
 	web_browsers[3].id = 4;
 	strcpy(web_browsers[3].name, "Opera");
@@ -36,7 +38,7 @@ void initialize_browsers()
 
 	web_browsers[4].id = 5;
 	strcpy(web_browsers[4].name, "Edge");
-	strcpy(web_browsers[4].command, "microsoft-edge");
+	strcpy(web_browsers[4].command, "msedge");
 }
 
 void save_selected_browser(struct web_browser *browser)
@@ -86,10 +88,10 @@ void list_browsers()
 	struct web_browser *selected_browser = load_selected_browser();
 	if (selected_browser != NULL)
 	{
-		printf("Current browser: %s\n\n", selected_browser->name);
+		printf("Current browser: %s\n", selected_browser->name);
 	}
 	printf("Available web browsers:\n");
-	for (int i = 0; i < 5; i++)
+	for (unsigned int i = 0; i < web_browsers_count; i++)
 	{
 		printf("%d. %s\n", web_browsers[i].id, web_browsers[i].name);
 	}
@@ -101,7 +103,7 @@ struct web_browser *choose_browser()
 	printf("Enter the number of the browser you want to use: ");
 	scanf("%d", &choice);
 
-	if (choice < 1 || choice > 5)
+	if (choice < 1 || choice > web_browsers_count)
 	{
 		printf("Invalid choice\n");
 		return NULL;
@@ -114,7 +116,7 @@ struct web_browser *choose_browser()
 		return NULL;
 	}
 
-	for (int i = 0; i < 5; i++)
+	for (unsigned int i = 0; i < web_browsers_count; i++)
 	{
 		if (web_browsers[i].id == choice)
 		{

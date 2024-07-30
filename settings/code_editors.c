@@ -8,22 +8,24 @@ struct code_editor
 	char command[65];
 } *code_editors;
 
+const unsigned int code_editors_count = 7;
+
 void initialize_code_editor()
 {
-	code_editors = malloc(sizeof(struct code_editor) * 7);
+	code_editors = malloc(sizeof(struct code_editor) * code_editors_count);
 	if (code_editors == NULL)
 	{
 		perror("Failed to allocate memory for code_editors");
 		exit(EXIT_FAILURE);
 	}
 
-	code_editors[1].id = 2;
-	strcpy(code_editors[1].name, "Visual Studio Code");
-	strcpy(code_editors[1].command, "code .");
-
 	code_editors[0].id = 1;
 	strcpy(code_editors[0].name, "Vim");
 	strcpy(code_editors[0].command, "gnome-terminal");
+
+	code_editors[1].id = 2;
+	strcpy(code_editors[1].name, "Visual Studio Code");
+	strcpy(code_editors[1].command, "code .");
 
 	code_editors[2].id = 3;
 	strcpy(code_editors[2].name, "Sublime Text");
@@ -95,12 +97,7 @@ void list_code_editors()
 		printf("Selected code editor: %s\n", selected_editor->name);
 		free(selected_editor);
 	}
-	else
-	{
-		printf("No code editor selected.\n");
-	}
-	printf("Available code editors:\n");
-	for (int i = 0; i < 7; i++)
+	for (unsigned int i = 0; i < code_editors_count; i++)
 	{
 		printf("%d. %s\n", code_editors[i].id, code_editors[i].name);
 	}
@@ -113,7 +110,7 @@ struct code_editor *choose_code_editor()
 	unsigned int choice;
 	scanf("%u", &choice);
 
-	if (choice < 1 || choice > 7)
+	if (choice < 1 || choice > code_editors_count)
 	{
 		printf("Invalid choice\n");
 		return NULL;
@@ -126,7 +123,7 @@ struct code_editor *choose_code_editor()
 		return NULL;
 	}
 
-	for (int i = 0; i < 7; i++)
+	for (unsigned int i = 0; i < code_editors_count; i++)
 	{
 		if (code_editors[i].id == choice)
 		{

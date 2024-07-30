@@ -17,6 +17,7 @@ struct code_editor
 // code_editors.c
 void  initialize_code_editor();
 void  list_code_editors();
+struct code_editor *choose_code_editor();
 
 // web_browsers.c
 void  initialize_browsers();
@@ -27,7 +28,7 @@ void save_selected_browser(struct web_browser *selected_browser);
 
 // settings.c
 void  settings_menu();
-void	add_workspace();
+void	add_workspace(char *workspace_name);
 void	remove_workspace();
 void	help(void);
 void	usage(void);

@@ -74,13 +74,30 @@ void add_workspace(char *workspace_name)
 	printf("Workspace %s added successfully\n", workspace_name);
 }
 
-void remove_workspace()
+void remove_workspace(char *workspace_name)
 {
 	// TODO: Implement remove_workspace function
 	// Implement validation 
-	// List all the workspaces
-	// Ask the user to select the workspace to remove
-	// Remove the selected workspace by id
+	int valid = 0;
+
+	if (find_workspace(workspace_name))
+	{
+		printf("Are you sure you want to remove %s? [0 no : 1 yes]\n", workspace_name);
+		scanf("%d", &valid);
+		if (valid)
+		{
+			// Remove the workspace
+			// TODO: Implement remove_workspace function
+			printf("Workspace %s removed successfully\n", workspace_name);
+		}
+		else
+		{
+			printf("Operation cancelled\n");
+			exit(EXIT_SUCCESS);
+		}
+	} else {
+		fprintf(stderr, "Workspace %s not found\n", workspace_name);
+	}
 }
 
 void modify_workspace()

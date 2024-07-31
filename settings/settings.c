@@ -2,15 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "settings.h"
-#include "../program/program.h"
-#include "../workspaces.h"
-
-void clear_input_buffer()
-{
-	int c;
-	while ((c = getchar()) != '\n' && c != EOF)
-		;
-}
+#include "../program/workspaces.h"
+#include "../utils/utils.h"
 
 void save_workspace(struct workspaces *workspace)
 {
@@ -27,115 +20,67 @@ void save_workspace(struct workspaces *workspace)
 		exit(EXIT_FAILURE);
 	}
 	printf("Workspace saved\n");
+	printf("Workspace id: %i\n", workspace->id);
 	fclose(file);
 }
 
-struct workspaces *workspaces = NULL;
-int num_workspaces = 0;
-
 void add_workspace(char *workspace_name)
 {
-	int validate = 0;
-
-	// system("clear");
 	printf("Adding workspace %s\n", workspace_name);
-	struct workspaces workspace;
 
-	workspace.id = count_workspaces() + 1;
-	strcpy(workspace.name, workspace_name);
-
-	printf("Enter workspace path: ");
-	scanf("%s", workspace.path);
-	clear_input_buffer();
-
-	// system("clear");
-	printf("Choose a code editor:\n");
-	initialize_code_editor();
-	struct code_editor *selected_editor = choose_code_editor();
-	if (selected_editor != NULL)
+	// Allocate memory for the new workspace
+	struct workspaces *new_workspace = (struct workspaces *)malloc(sizeof(struct workspaces));
+	if (new_workspace == NULL)
 	{
-		workspace.editor = selected_editor;
-		printf("You have selected: %s\n", selected_editor->name);
-	}
-	else
-	{
-		printf("No code editor selected\n");
-		workspace.editor = NULL;
+		perror("Failed to allocate memory for new workspace");
+		exit(EXIT_FAILURE);
 	}
 
-	// system("clear");
-	char urls_input[100];
-	printf("Enter URLs (comma-separated): ");
-	printf("Put comma [,] if no url\n");
-	scanf("%s", urls_input);
-	workspace.urls = str_split(urls_input, ",");
-	clear_input_buffer();
+	// Get the number of workspaces
+	int num_workspaces = get_workspace_id();
 
-	// system("clear");
-	char start_command_input[120];
-	printf("Enter start commands (comma-separated): ");
-	scanf("%s", start_command_input);
-	workspace.start_command = str_split(start_command_input, ",");
-	clear_input_buffer();
+	// Set the workspace ID
+	new_workspace->id = num_workspaces;
 
-	// system("clear");
-	char stop_command_input[120];
-	printf("Enter stop commands (comma-separated): ");
-	printf("Put comma [,] if no stop command\n");
-	scanf("%s", stop_command_input);
-	workspace.stop_command = str_split(stop_command_input, ",");
-	clear_input_buffer();
+	// Copy the workspace name
+	strncpy(new_workspace->name, workspace_name, sizeof(new_workspace->name) - 1);
+	new_workspace->name[sizeof(new_workspace->name) - 1] = '\0';
 
-	// system("clear");
-	printf("Do you need sudoer rights to run this workspace? (1 for yes, 0 for no): ");
-	scanf("%d", &workspace.need_sudoer);
-	clear_input_buffer();
-	if (workspace.need_sudoer != 0 && workspace.need_sudoer != 1)
+	// Set default values for other fields
+	strcpy(new_workspace->path, "/home/paul/");
+	new_workspace->editor = NULL;
+	new_workspace->urls = NULL;
+	new_workspace->start_command = NULL;
+	new_workspace->stop_command = NULL;
+	new_workspace->need_sudoer = 0;
+
+	// Save the workspace
+	save_workspace(new_workspace);
+
+	// Reallocate memory for the workspaces array
+	workspaces = (struct workspaces *)realloc(workspaces, num_workspaces * sizeof(struct workspaces));
+	if (workspaces == NULL)
 	{
-		printf("Invalid choice\n");
-		return;
+		perror("Failed to reallocate memory for workspaces array");
+		exit(EXIT_FAILURE);
 	}
 
-	// Print the entire form
-	// system("clear");
-	printf("Workspace name: %s\n", workspace_name);
-	printf("Workspace path: %s\n", workspace.path);
-	printf("URLs: ");
-	for (int i = 0; workspace.urls[i] != NULL; i++)
-	{
-		printf("%s ", workspace.urls[i]);
-	}
-	printf("\n");
-	printf("Start commands: ");
-	for (int i = 0; workspace.start_command[i] != NULL; i++)
-	{
-		printf("%s ", workspace.start_command[i]);
-	}
-	printf("\n");
-	printf("Stop commands: ");
-	for (int i = 0; workspace.stop_command[i] != NULL; i++)
-	{
-		printf("%s ", workspace.stop_command[i]);
-	}
-	printf("\n");
-	printf("Need sudoer rights: %d\n", workspace.need_sudoer);
+	// Add the new workspace to the array
+	workspaces[num_workspaces -1] = *new_workspace;
 
-	printf("Is this informations correct? (1 for yes, 0 for no): ");
-	scanf("%d", &validate);
-	clear_input_buffer();
-	if (validate != 1)
-	{
-		printf("Workspace not saved\n");
-		return;
-	}
+	// Free the allocated memory for the new workspace
+	free(new_workspace);
 
-	// Save workspace
-	if (validate)
-		save_workspace(&workspace);
+	printf("Workspace %s added successfully\n", workspace_name);
 }
 
 void remove_workspace()
 {
+	// TODO: Implement remove_workspace function
+	// Implement validation 
+	// List all the workspaces
+	// Ask the user to select the workspace to remove
+	// Remove the selected workspace by id
 }
 
 void modify_workspace()

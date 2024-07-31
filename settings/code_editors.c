@@ -48,23 +48,6 @@ void initialize_code_editor()
 	strcpy(code_editors[6].command, "atom .");
 }
 
-void save_selected_code_editor(struct code_editor *editor)
-{
-	FILE *file = fopen("selected_code_editor.dat", "wb");
-	if (file == NULL)
-	{
-		perror("Failed to open file for writing");
-		exit(EXIT_FAILURE);
-	}
-	if(fwrite(editor, sizeof(struct code_editor), 1, file) != 1)
-	{
-		perror("Failed to write code editor data to file");
-		fclose(file);
-		exit(EXIT_FAILURE);
-	}
-	fclose(file);
-}
-
 struct code_editor *load_selected_code_editor()
 {
 	FILE *file = fopen("selected_code_editor.dat", "rb");

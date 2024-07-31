@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "workspaces.h"
-#include "program/program.h"
+#include "program/workspaces.h"
 #include "settings/settings.h"
 
 struct web_browser *selected_browser = NULL;
+struct workspaces *workspaces = NULL;
 
 void init()
 {

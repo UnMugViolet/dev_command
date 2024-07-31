@@ -12,13 +12,10 @@ struct workspaces {
     unsigned int need_sudoer;
 };
 
+extern int num_workspaces;
 extern struct workspaces *workspaces;
 
 void start_workspace(char *workspace);
 void stop_workspace(char *workspace);
-void list_workspaces();
-int get_workspace_id();
-int find_workspace(char *workspace_name);
-int find_workspace_by_id(int *workspace_id);
 
 #endif // WORKSPACES_H

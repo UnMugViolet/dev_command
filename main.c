@@ -6,6 +6,7 @@
 
 struct web_browser *selected_browser = NULL;
 struct workspaces *workspaces = NULL;
+int num_workspaces = 0;
 
 void init()
 {
@@ -36,6 +37,8 @@ int check_argv(char *argv, char *str)
 int main(int argc, char **argv)
 {
 	selected_browser = load_selected_browser();
+	num_workspaces = count_workspaces();
+
 	if (selected_browser == NULL)
 	{
 		init();

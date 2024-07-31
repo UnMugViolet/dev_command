@@ -62,7 +62,7 @@ struct code_editor *load_selected_code_editor()
 		fclose(file);
 		exit(EXIT_FAILURE);
 	}
-	if(fread(editor, sizeof(struct code_editor), 1, file) != 1)
+	if (fread(editor, sizeof(struct code_editor), 1, file) != 1)
 	{
 		perror("Failed to read code editor data from file");
 		fclose(file);
@@ -74,12 +74,7 @@ struct code_editor *load_selected_code_editor()
 
 void list_code_editors()
 {
-	struct code_editor *selected_editor = load_selected_code_editor();
-	if (selected_editor != NULL)
-	{
-		printf("Selected code editor: %s\n", selected_editor->name);
-		free(selected_editor);
-	}
+	printf("0. None\n");
 	for (unsigned int i = 0; i < code_editors_count; i++)
 	{
 		printf("%d. %s\n", code_editors[i].id, code_editors[i].name);
@@ -88,12 +83,13 @@ void list_code_editors()
 
 struct code_editor *choose_code_editor()
 {
+	initialize_code_editor();
 	list_code_editors();
 	printf("Enter the ID of the code editor you want to use: ");
 	unsigned int choice;
 	scanf("%u", &choice);
 
-	if (choice < 1 || choice > code_editors_count)
+	if (choice > code_editors_count)
 	{
 		printf("Invalid choice\n");
 		return NULL;
@@ -102,17 +98,20 @@ struct code_editor *choose_code_editor()
 	struct code_editor *selected_editor = malloc(sizeof(struct code_editor));
 	if (selected_editor == NULL)
 	{
-		perror("Failed to find the code editor\n");
+		perror("Failed to allocate memory for the code editor\n");
 		return NULL;
 	}
 
 	for (unsigned int i = 0; i < code_editors_count; i++)
 	{
+		if (choice == 0)
+		{
+			return NULL;
+		}
 		if (code_editors[i].id == choice)
 		{
 			*selected_editor = code_editors[i];
-			free(code_editors);
-			return &code_editors[i];
+			return selected_editor;
 		}
 	}
 	printf("Failed to find the code editor\n");

@@ -5,26 +5,66 @@
 #include "../program/workspaces.h"
 #include "../utils/utils.h"
 
-void save_workspace(struct workspaces *workspace)
+void save_workspace(struct workspaces *ws, const char *filename)
 {
-	FILE *file = fopen("workspaces.dat", "ab");
+	FILE *file = fopen(filename, "ab");
 	if (file == NULL)
 	{
-		perror("Failed to open file for writing");
-		exit(EXIT_FAILURE);
+		perror("Failed to open file");
+		return;
 	}
-	if (fwrite(workspace, sizeof(struct workspaces), 1, file) != 1)
+
+	fwrite(ws, sizeof(struct workspaces), 1, file);
+
+	if (ws->editor != NULL)
 	{
-		perror("Failed to write workspace data to file");
-		fclose(file);
-		exit(EXIT_FAILURE);
+		fwrite(ws->editor, sizeof(struct code_editor), 1, file);
 	}
-	printf("Workspace saved\n");
-	printf("Workspace id: %i\n", workspace->id);
+
+	// Save URLs
+	if (ws->urls != NULL)
+	{
+		for (int i = 0; ws->urls[i] != NULL; i++)
+		{
+			size_t len = strlen(ws->urls[i]) + 1;
+			fwrite(&len, sizeof(size_t), 1, file);
+			fwrite(ws->urls[i], sizeof(char), len, file);
+		}
+		size_t end = 0;
+		fwrite(&end, sizeof(size_t), 1, file); // Null terminator
+	}
+
+	// Save start commands
+	if (ws->start_command != NULL)
+	{
+		for (int i = 0; ws->start_command[i] != NULL; i++)
+		{
+			size_t len = strlen(ws->start_command[i]) + 1;
+			fwrite(&len, sizeof(size_t), 1, file);
+			fwrite(ws->start_command[i], sizeof(char), len, file);
+		}
+		size_t end = 0;
+		fwrite(&end, sizeof(size_t), 1, file);
+	}
+
+	// Save stop commands
+	if (ws->stop_command != NULL)
+	{
+		for (int i = 0; ws->stop_command[i] != NULL; i++)
+		{
+			size_t len = strlen(ws->stop_command[i]) + 1;
+			fwrite(&len, sizeof(size_t), 1, file);
+			fwrite(ws->stop_command[i], sizeof(char), len, file);
+		}
+		size_t end = 0;
+		fwrite(&end, sizeof(size_t), 1, file);
+	}
+
 	fclose(file);
 }
 
-void add_workspace_form(struct workspaces *ws) {
+void add_workspace_form(struct workspaces *ws)
+{
 	char input[256];
 
 	system("clear");
@@ -36,13 +76,16 @@ void add_workspace_form(struct workspaces *ws) {
 	system("clear");
 	printf("Choose a code editor: \n");
 	ws->editor = choose_code_editor();
-	if (ws->editor == NULL) {
-			printf("No code editor selected\n");
+	if (ws->editor == NULL)
+	{
+		printf("No code editor selected\n");
 	}
 
 	// Clear the input buffer
 	int c;
-	while ((c = getchar()) != '\n' && c != EOF) {}
+	while ((c = getchar()) != '\n' && c != EOF)
+	{
+	}
 
 	system("clear");
 	printf("Enter the URLs separated by a comma [,]: \n");
@@ -50,7 +93,7 @@ void add_workspace_form(struct workspaces *ws) {
 	process_input(input, &(ws->urls), 1);
 }
 
-int summarize_form_and_confirm(struct workspaces *ws) 
+int summarize_form_and_confirm(struct workspaces *ws)
 {
 	int confirm;
 
@@ -59,37 +102,52 @@ int summarize_form_and_confirm(struct workspaces *ws)
 	printf("Workspace name: %s\n", ws->name);
 	printf("Workspace path: %s\n", ws->path);
 	printf("Code editor: ");
-	if (ws->editor == NULL) {
-			printf("None\n");
-	} else {
-			printf("%s\n", ws->editor->name);
+	if (ws->editor == NULL)
+	{
+		printf("None\n");
+	}
+	else
+	{
+		printf("%s\n", ws->editor->name);
 	}
 	printf("URLs: ");
-	if (ws->urls == NULL) {
-			printf("None\n");
-	} else {
-			for (char **url = ws->urls; *url; url++) {
-					printf("%s ", *url);
-			}
-			printf("\n");
+	if (ws->urls == NULL)
+	{
+		printf("None\n");
+	}
+	else
+	{
+		for (char **url = ws->urls; *url; url++)
+		{
+			printf("%s ", *url);
+		}
+		printf("\n");
 	}
 	printf("Start commands: ");
-	if (ws->start_command == NULL) {
-			printf("None\n");
-	} else {
-			for (int i = 0; ws->start_command[i]; i++) {
-					printf("%s ", ws->start_command[i]);
-			}
-			printf("\n");
+	if (ws->start_command == NULL)
+	{
+		printf("None\n");
+	}
+	else
+	{
+		for (int i = 0; ws->start_command[i]; i++)
+		{
+			printf("%s ", ws->start_command[i]);
+		}
+		printf("\n");
 	}
 	printf("Stop commands: ");
-	if (ws->stop_command == NULL) {
-			printf("None\n");
-	} else {
-			for (int i = 0; ws->stop_command[i]; i++) {
-					printf("%s ", ws->stop_command[i]);
-			}
-			printf("\n");
+	if (ws->stop_command == NULL)
+	{
+		printf("None\n");
+	}
+	else
+	{
+		for (int i = 0; ws->stop_command[i]; i++)
+		{
+			printf("%s ", ws->stop_command[i]);
+		}
+		printf("\n");
 	}
 	printf("Need sudoer: %d\n", ws->need_sudoer);
 
@@ -130,7 +188,7 @@ void add_workspace(char *workspace_name)
 	// Save the workspace if confirmed
 	if (confirm)
 	{
-		save_workspace(new_workspace);
+		save_workspace(new_workspace, "workspaces.dat");
 		printf("Workspace %s added successfully\n", workspace_name);
 	}
 	else
@@ -149,7 +207,6 @@ void add_workspace(char *workspace_name)
 
 	// Free the allocated memory for the new workspace
 	free(new_workspace);
-
 }
 
 void remove_workspace(char *workspace_name)

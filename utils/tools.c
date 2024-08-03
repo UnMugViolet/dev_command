@@ -1,15 +1,51 @@
 #include "../program/workspaces.h"
 #include "../settings/settings.h"
+#include "utils.h"
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
-
-void clear_input_buffer()
+void get_user_input(char *buffer, int size)
 {
-	int c;
-	while ((c = getchar()) != '\n' && c != EOF);
+	if (fgets(buffer, size, stdin) == NULL)
+	{
+		perror("Failed to read user input");
+		exit(EXIT_FAILURE);
+	}
+	buffer[strcspn(buffer, "\n")] = 0;
+}
+
+void add_multiple_fields(char **fields, char *input)
+{
+	printf("Input: %s\n", input);
+	char **split_input = str_split(input, ",");
+	for (int i = 0; split_input[i]; i++)
+	{
+		printf("Splited input: %s\n", split_input[i]);
+	}
+
+	int input_count = count_words(input, ",");
+	printf("Input count: %i\n", input_count);
+
+	for (int i = 0; i < input_count; i++)
+	{
+		fields[i] = split_input[i];
+		printf("%s\n", fields[i]);
+	}
+	fields[input_count + 1] = NULL;
+	printf("Final fields count: %i\n", input_count);
+	printf("Manage to go through the loop\n");
+}
+
+void process_input(char *input, void *field, int is_array) {
+	if (is_array) {
+			char ***array_field = (char ***)field;
+			*array_field = str_split(input, ",");
+	} else {
+			char *string_field = (char *)field;
+			strncpy(string_field, input, strlen(input) + 1);
+	}
 }
 
 int count_workspaces()

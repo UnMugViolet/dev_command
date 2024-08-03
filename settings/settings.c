@@ -24,25 +24,28 @@ void save_workspace(struct workspaces *workspace)
 	fclose(file);
 }
 
-void add_workspace_form(struct workspaces *ws)
-{
+void add_workspace_form(struct workspaces *ws) {
+	char input[256];
+
 	system("clear");
 	printf("ADD WORKSPACE\n");
 	printf("Enter the workspace path: \n");
-	scanf("%s", ws->path);
+	get_user_input(input, sizeof(input));
+	process_input(input, ws->path, 0);
+
 	system("clear");
 	printf("Choose a code editor: \n");
 	ws->editor = choose_code_editor();
-	if (ws->editor == NULL)
-	{
-		printf("No code editor selected\n");
+	if (ws->editor == NULL) {
+			printf("No code editor selected\n");
 	}
+
 	system("clear");
 	printf("Enter the URLs separated by a comma [,]: \n");
-	char urls[120];
-	scanf("%s", urls);
-	ws->urls = str_split(urls, ",");
+	get_user_input(input, sizeof(input));
+	process_input(input, &(ws->urls), 1);
 }
+
 
 int summarize_form_and_confirm(struct workspaces *ws) 
 {
@@ -122,7 +125,10 @@ void add_workspace(char *workspace_name)
 
 	// Save the workspace if confirmed
 	if (confirm)
+	{
 		save_workspace(new_workspace);
+		printf("Workspace %s added successfully\n", workspace_name);
+	}
 	else
 		printf("Workspace not saved\n");
 
@@ -140,7 +146,6 @@ void add_workspace(char *workspace_name)
 	// Free the allocated memory for the new workspace
 	free(new_workspace);
 
-	printf("Workspace %s added successfully\n", workspace_name);
 }
 
 void remove_workspace(char *workspace_name)

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <ctype.h>
 #include "utils.h"
 
 int is_charset(char c, char *charset)
@@ -15,11 +16,6 @@ int is_charset(char c, char *charset)
   return (0);
 }
 
-int is_space(char c)
-{
-  return (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\v' || c == '\f');
-}
-
 int count_words(char *str, char *charset)
 {
   int i = 0;
@@ -28,13 +24,13 @@ int count_words(char *str, char *charset)
   while (str[i])
   {
     // Skip leading spaces and delimiters
-    while (str[i] && (is_space(str[i]) || is_charset(str[i], charset)))
+    while (str[i] && (isspace(str[i]) || is_charset(str[i], charset)))
       i++;
 
-    if (str[i] && !is_charset(str[i], charset) && !is_space(str[i]))
+    if (str[i] && !is_charset(str[i], charset) && !isspace(str[i]))
     {
       count++;
-      while (str[i] && !is_charset(str[i], charset) && !is_space(str[i]))
+      while (str[i] && !is_charset(str[i], charset) && !isspace(str[i]))
         i++;
     }
   }
@@ -46,10 +42,10 @@ int ft_word_len(char *str, char *charset)
   int i = 0;
   int counter = 0;
 
-  while (str[i] && (is_space(str[i]) || is_charset(str[i], charset)))
+  while (str[i] && (isspace(str[i]) || is_charset(str[i], charset)))
     i++;
 
-  while (str[i] && !is_charset(str[i], charset) && !is_space(str[i]))
+  while (str[i] && !is_charset(str[i], charset) && !isspace(str[i]))
   {
     counter++;
     i++;
@@ -65,10 +61,10 @@ void ft_strcpy(char *str, char *charset, char *array)
 
   i = 0;
   j = 0;
-  while (str[i] && (is_space(str[i]) || is_charset(str[i], charset)))
+  while (str[i] && (isspace(str[i]) || is_charset(str[i], charset)))
     i++;
 
-  while (str[i] && !is_charset(str[i], charset) && !is_space(str[i]))
+  while (str[i] && !is_charset(str[i], charset) && !isspace(str[i]))
   {
     array[j] = str[i];
     i++;
@@ -98,7 +94,7 @@ char **str_split(char *str, char *charset)
     next_word += word_len;
 
     // Skip trailing spaces and delimiters
-    while (str[next_word] && (is_space(str[next_word]) || is_charset(str[next_word], charset)))
+    while (str[next_word] && (isspace(str[next_word]) || is_charset(str[next_word], charset)))
       next_word++;
     i++;
   }

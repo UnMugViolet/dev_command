@@ -40,17 +40,21 @@ void add_workspace_form(struct workspaces *ws) {
 			printf("No code editor selected\n");
 	}
 
+	// Clear the input buffer
+	int c;
+	while ((c = getchar()) != '\n' && c != EOF) {}
+
 	system("clear");
 	printf("Enter the URLs separated by a comma [,]: \n");
 	get_user_input(input, sizeof(input));
 	process_input(input, &(ws->urls), 1);
 }
 
-
 int summarize_form_and_confirm(struct workspaces *ws) 
 {
 	int confirm;
 
+	system("clear");
 	printf("Workspace id: %i\n", ws->id);
 	printf("Workspace name: %s\n", ws->name);
 	printf("Workspace path: %s\n", ws->path);

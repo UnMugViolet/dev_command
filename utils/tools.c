@@ -130,78 +130,119 @@ int find_workspace(char *project)
 	return -1;
 }
 
-void list_workspaces() {
+char **deserialize_array(FILE *file) 
+{
+	size_t len;
+	char **array = NULL;
+	int count = 0;
+
+	while (fread(&len, sizeof(size_t), 1, file) && len > 0) {
+			array = realloc(array, (count + 1) * sizeof(char *));
+			if (array == NULL) {
+					perror("Failed to realloc array");
+					exit(EXIT_FAILURE);
+			}
+			array[count] = malloc(len);
+			if (array[count] == NULL) {
+					perror("Failed to malloc array[count]");
+					exit(EXIT_FAILURE);
+			}
+			fread(array[count], sizeof(char), len, file);
+			count++;
+	}
+	array = realloc(array, (count + 1) * sizeof(char *));
+	if (array == NULL) {
+			perror("Failed to realloc array for NULL terminator");
+			exit(EXIT_FAILURE);
+	}
+	array[count] = NULL; // Null terminator
+
+	return array;
+}
+
+struct workspaces *read_workspace(FILE *file)
+{
+	struct workspaces *workspace = malloc(sizeof(struct workspaces));
+	if (fread(workspace, sizeof(struct workspaces), 1, file)) {
+			if (workspace->editor != NULL) {
+					workspace->editor = malloc(sizeof(struct code_editor));
+					fread(workspace->editor, sizeof(struct code_editor), 1, file);
+			}
+
+			// Load URLs
+			workspace->urls = deserialize_array(file);
+
+			// Load start commands
+			workspace->start_command = deserialize_array(file);
+
+			// Load stop commands
+			workspace->stop_command = deserialize_array(file);
+
+			return workspace;
+	}
+	free(workspace);
+	return NULL;
+}
+
+void list_workspaces() 
+{
 	FILE *file = fopen("workspaces.dat", "rb");
 	if (file == NULL) {
 			printf("No workspaces found.\nworkspace add [name] to add a workspace.\n");
 			exit(EXIT_FAILURE);
 	}
 
-	struct workspaces workspace;
-	while (fread(&workspace, sizeof(struct workspaces), 1, file)) {
-			if (workspace.editor != NULL) {
-					workspace.editor = malloc(sizeof(struct code_editor));
-					fread(workspace.editor, sizeof(struct code_editor), 1, file);
-			}
-
-			// Load URLs
-			size_t len;
-			workspace.urls = NULL;
-			while (fread(&len, sizeof(size_t), 1, file) && len > 0) {
-					workspace.urls = realloc(workspace.urls, (len + 1) * sizeof(char *));
-					workspace.urls[len] = malloc(len);
-					fread(workspace.urls[len], sizeof(char), len, file);
-			}
-
-			// Load start commands
-			workspace.start_command = NULL;
-			while (fread(&len, sizeof(size_t), 1, file) && len > 0) {
-					workspace.start_command = realloc(workspace.start_command, (len + 1) * sizeof(char *));
-					workspace.start_command[len] = malloc(len);
-					fread(workspace.start_command[len], sizeof(char), len, file);
-			}
-
-			// Load stop commands
-			workspace.stop_command = NULL;
-			while (fread(&len, sizeof(size_t), 1, file) && len > 0) {
-					workspace.stop_command = realloc(workspace.stop_command, (len + 1) * sizeof(char *));
-					workspace.stop_command[len] = malloc(len);
-					fread(workspace.stop_command[len], sizeof(char), len, file);
-			}
-
-			printf("Workspace id: %i\n", workspace.id);
-			printf("Workspace name: %s\n", workspace.name);
-			printf("Workspace editor: %s\n", workspace.editor->name);
-			printf("Workspace path: %s\n", workspace.path);
+	struct workspaces *workspace;
+	while ((workspace = read_workspace(file)) != NULL) {
+			printf("Workspace id: %i\n", workspace->id);
+			printf("Workspace name: %s\n", workspace->name);
+			printf("Workspace editor: %s\n", workspace->editor->name);
+			printf("Workspace path: %s\n", workspace->path);
 			printf("URLs: ");
-			if (workspace.urls == NULL) {
+			if (!workspace->urls) {
 					printf("None\n");
 			} else {
-					for (int i = 0; workspace.urls[i]; i++) {
-							printf("%s ", workspace.urls[i]);
-							printf("\n");
+					for (int i = 0; workspace->urls[i]; i++) {
+							printf("%s ", workspace->urls[i]);
 					}
+					printf("\n");
 			}
 			printf("Start commands: ");
-			if (workspace.start_command == NULL) {
+			if (!workspace->start_command) {
 					printf("None\n");
 			} else {
-					for (int i = 0; workspace.start_command[i]; i++) {
-							printf("%s ", workspace.start_command[i]);
-							printf("\n");
+					for (int i = 0; workspace->start_command[i]; i++) {
+							printf("%s, ", workspace->start_command[i]);
 					}
+					printf("\n");
 			}
 			printf("Stop commands: ");
-			if (workspace.stop_command == NULL) {
+			if (!workspace->stop_command) {
 					printf("None\n");
 			} else {
-					for (int i = 0; workspace.stop_command[i]; i++) {
-							printf("%s ", workspace.stop_command[i]);
+					for (int i = 0; workspace->stop_command[i]; i++) {
+							printf("%s ", workspace->stop_command[i]);
 							printf("\n");
 					}
 			}
-			printf("Need sudoer: %d\n", workspace.need_sudoer);
+			printf("Need sudoer: %d\n", workspace->need_sudoer);
 			printf("\n");
+
+			// Free allocated memory
+			free(workspace->editor);
+			for (int i = 0; workspace->urls && workspace->urls[i]; i++) {
+					free(workspace->urls[i]);
+			}
+			free(workspace->urls);
+			for (int i = 0; workspace->start_command && workspace->start_command[i]; i++) {
+					free(workspace->start_command[i]);
+			}
+			free(workspace->start_command);
+			for (int i = 0; workspace->stop_command && workspace->stop_command[i]; i++) {
+					free(workspace->stop_command[i]);
+			}
+			free(workspace->stop_command);
+			free(workspace);
 	}
 	fclose(file);
 }

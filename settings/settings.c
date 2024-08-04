@@ -5,59 +5,50 @@
 #include "../program/workspaces.h"
 #include "../utils/utils.h"
 
-void save_workspace(struct workspaces *ws, const char *filename)
-{
+void save_workspace(struct workspaces *ws, const char *filename) {
 	FILE *file = fopen(filename, "ab");
-	if (file == NULL)
-	{
-		perror("Failed to open file");
-		return;
+	if (file == NULL) {
+			perror("Failed to open file");
+			return;
 	}
 
 	fwrite(ws, sizeof(struct workspaces), 1, file);
 
-	if (ws->editor != NULL)
-	{
-		fwrite(ws->editor, sizeof(struct code_editor), 1, file);
+	if (ws->editor != NULL) {
+			fwrite(ws->editor, sizeof(struct code_editor), 1, file);
 	}
 
 	// Save URLs
-	if (ws->urls != NULL)
-	{
-		for (int i = 0; ws->urls[i] != NULL; i++)
-		{
-			size_t len = strlen(ws->urls[i]) + 1;
-			fwrite(&len, sizeof(size_t), 1, file);
-			fwrite(ws->urls[i], sizeof(char), len, file);
-		}
-		size_t end = 0;
-		fwrite(&end, sizeof(size_t), 1, file); // Null terminator
+	if (ws->urls != NULL) {
+			for (int i = 0; ws->urls[i] != NULL; i++) {
+					size_t len = strlen(ws->urls[i]) + 1;
+					fwrite(&len, sizeof(size_t), 1, file);
+					fwrite(ws->urls[i], sizeof(char), len, file);
+			}
+			size_t end = 0;
+			fwrite(&end, sizeof(size_t), 1, file); // Null terminator
 	}
 
 	// Save start commands
-	if (ws->start_command != NULL)
-	{
-		for (int i = 0; ws->start_command[i] != NULL; i++)
-		{
-			size_t len = strlen(ws->start_command[i]) + 1;
-			fwrite(&len, sizeof(size_t), 1, file);
-			fwrite(ws->start_command[i], sizeof(char), len, file);
-		}
-		size_t end = 0;
-		fwrite(&end, sizeof(size_t), 1, file);
+	if (ws->start_command != NULL) {
+			for (int i = 0; ws->start_command[i] != NULL; i++) {
+					size_t len = strlen(ws->start_command[i]) + 1;
+					fwrite(&len, sizeof(size_t), 1, file);
+					fwrite(ws->start_command[i], sizeof(char), len, file);
+			}
+			size_t end = 0;
+			fwrite(&end, sizeof(size_t), 1, file); // Null terminator
 	}
 
 	// Save stop commands
-	if (ws->stop_command != NULL)
-	{
-		for (int i = 0; ws->stop_command[i] != NULL; i++)
-		{
-			size_t len = strlen(ws->stop_command[i]) + 1;
-			fwrite(&len, sizeof(size_t), 1, file);
-			fwrite(ws->stop_command[i], sizeof(char), len, file);
-		}
-		size_t end = 0;
-		fwrite(&end, sizeof(size_t), 1, file);
+	if (ws->stop_command != NULL) {
+			for (int i = 0; ws->stop_command[i] != NULL; i++) {
+					size_t len = strlen(ws->stop_command[i]) + 1;
+					fwrite(&len, sizeof(size_t), 1, file);
+					fwrite(ws->stop_command[i], sizeof(char), len, file);
+			}
+			size_t end = 0;
+			fwrite(&end, sizeof(size_t), 1, file); // Null terminator
 	}
 
 	fclose(file);
